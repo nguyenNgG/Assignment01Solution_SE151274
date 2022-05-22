@@ -5,10 +5,15 @@
 @{
     bool isAuthenticated = false;
     bool isAuthorized = false;
+    int memberId = -2;
     HttpResponseMessage response = await SessionHelper.Authenticate(Context.Session, sessionStorage);
     if (response.StatusCode == HttpStatusCode.OK)
     {
         isAuthenticated = true;
+
+        response = await SessionHelper.Current(Context.Session, sessionStorage);
+        HttpContent content = response.Content;
+        memberId = int.Parse(await content.ReadAsStringAsync());
     }
     response = await SessionHelper.Authorize(Context.Session, sessionStorage);
     if (response.StatusCode == HttpStatusCode.OK)
@@ -53,6 +58,12 @@
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-page="/Members/Login">Login</a>
+                            </li>
+                        }
+                        @if (isAuthenticated && !isAuthorized)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Members/@memberId">Profile</a>
                             </li>
                         }
                         @if (isAuthenticated)

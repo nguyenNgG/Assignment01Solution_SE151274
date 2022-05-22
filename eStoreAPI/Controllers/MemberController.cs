@@ -52,6 +52,19 @@ namespace eStoreAPI.Controllers
             return BadRequest();
         }
 
+        [HttpGet("current")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(int))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public ActionResult Current()
+        {
+            MemberAuthentication auth = SessionHelper.GetFromSession<MemberAuthentication>(HttpContext.Session, SessionValue.Authentication);
+            if (auth != null)
+            {
+                return Ok(auth.MemberId);
+            }
+            return BadRequest();
+        }
+
         [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MemberAuthentication))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -177,8 +190,16 @@ namespace eStoreAPI.Controllers
 
             try
             {
-                await repository.UpdateMember(member);
-                return Ok(member);
+                MemberAuthentication auth = SessionHelper.GetFromSession<MemberAuthentication>(HttpContext.Session, SessionValue.Authentication);
+                if (auth != null)
+                {
+                    if (auth.MemberId == id || auth.IsAdmin)
+                    {
+                        await repository.UpdateMember(member);
+                        return Ok(member);
+                    }
+                }
+                return BadRequest();
             }
             catch (DbUpdateException)
             {

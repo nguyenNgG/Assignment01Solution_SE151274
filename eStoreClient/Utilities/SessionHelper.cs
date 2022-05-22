@@ -8,15 +8,21 @@ namespace eStoreClient.Utilities
 {
     public static class SessionHelper
     {
+        public static async Task<HttpResponseMessage> Current(ISession session, HttpSessionStorage sessionStorage)
+        {
+            HttpClient httpClient = GetHttpClient(session, sessionStorage);
+            return await httpClient.GetAsync(Endpoints.Current);
+        }
+
         public static async Task<HttpResponseMessage> Authenticate(ISession session, HttpSessionStorage sessionStorage)
         {
-            HttpClient httpClient = SessionHelper.GetHttpClient(session, sessionStorage);
+            HttpClient httpClient = GetHttpClient(session, sessionStorage);
             return await httpClient.GetAsync(Endpoints.Authenticate);
         }
 
         public static async Task<HttpResponseMessage> Authorize(ISession session, HttpSessionStorage sessionStorage)
         {
-            HttpClient httpClient = SessionHelper.GetHttpClient(session, sessionStorage);
+            HttpClient httpClient = GetHttpClient(session, sessionStorage);
             return await httpClient.GetAsync(Endpoints.Authorize);
         }
 

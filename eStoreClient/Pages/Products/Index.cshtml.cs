@@ -24,6 +24,9 @@ namespace eStoreClient.Pages.Products
 
         public IList<Product> Products { get; set; }
 
+        [BindProperty]
+        public string Filter { get; set; }
+
         public async Task<IActionResult> OnGetAsync()
         {
             try
@@ -33,6 +36,37 @@ namespace eStoreClient.Pages.Products
                 {
                     HttpClient httpClient = SessionHelper.GetHttpClient(HttpContext.Session, sessionStorage);
                     HttpResponseMessage response = await httpClient.GetAsync($"{Endpoints.Products}");
+                    HttpContent content = response.Content;
+                    if (response.StatusCode == HttpStatusCode.OK)
+                    {
+                        JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true,
+                        };
+                        Products = JsonSerializer.Deserialize<List<Product>>(await content.ReadAsStringAsync(), jsonSerializerOptions);
+                        return Page();
+                    }
+                    if (response.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        return Page();
+                    }
+                }
+            }
+            catch
+            {
+            }
+            return RedirectToPage(PageRoute.Login);
+        }
+
+        public async Task<IActionResult> OnPostAsync()
+        {
+            try
+            {
+                HttpResponseMessage authResponse = await SessionHelper.Authorize(HttpContext.Session, sessionStorage);
+                if (authResponse.StatusCode == HttpStatusCode.OK)
+                {
+                    HttpClient httpClient = SessionHelper.GetHttpClient(HttpContext.Session, sessionStorage);
+                    HttpResponseMessage response = await httpClient.GetAsync($"{Endpoints.Products}?query={Filter}");
                     HttpContent content = response.Content;
                     if (response.StatusCode == HttpStatusCode.OK)
                     {

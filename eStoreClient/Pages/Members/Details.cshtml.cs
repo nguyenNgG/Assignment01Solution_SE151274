@@ -34,12 +34,22 @@ namespace eStoreClient.Pages.Members
                     return RedirectToPage(PageRoute.Members);
                 }
 
-                HttpResponseMessage authResponse = await SessionHelper.Authorize(HttpContext.Session, sessionStorage);
+                HttpResponseMessage authResponse = await SessionHelper.Current(HttpContext.Session, sessionStorage);
+                HttpContent content = authResponse.Content;
+                int _memberId = int.Parse(await content.ReadAsStringAsync());
+                if (_memberId == id)
+                {
+                    authResponse.StatusCode = HttpStatusCode.OK;
+                }
+                else
+                {
+                    authResponse = await SessionHelper.Authorize(HttpContext.Session, sessionStorage);
+                }
                 if (authResponse.StatusCode == HttpStatusCode.OK)
                 {
                     HttpClient httpClient = SessionHelper.GetHttpClient(HttpContext.Session, sessionStorage);
                     HttpResponseMessage response = await httpClient.GetAsync($"{Endpoints.Members}/{id}");
-                    HttpContent content = response.Content;
+                    content = response.Content;
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
                         JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions

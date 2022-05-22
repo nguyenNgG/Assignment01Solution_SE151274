@@ -41,12 +41,8 @@ namespace DataAccess.DAOs
         {
             FStoreDBContext db = new FStoreDBContext();
             query = query.ToLower();
-            List<Product> products = await db.Products.Include(m => m.Category).Where(m =>
-            m.ProductId.ToString().Contains(query)
-            || m.ProductName.ToLower().Contains(query)
+            List<Product> products = await db.Products.Include(m => m.Category).Where(m => m.ProductName.ToLower().Contains(query)
             || m.UnitPrice.ToString().Contains(query)
-            || m.Weight.ToLower().Contains(query)
-            || m.UnitsInStock.ToString().Contains(query)
             ).ToListAsync();
             return products;
         }

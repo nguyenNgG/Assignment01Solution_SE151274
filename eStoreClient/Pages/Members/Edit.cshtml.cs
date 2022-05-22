@@ -44,12 +44,22 @@ namespace eStoreClient.Pages.Members
                 MemberId = (int)id;
                 TempData["MemberId"] = MemberId;
 
-                HttpResponseMessage authResponse = await SessionHelper.Authorize(HttpContext.Session, sessionStorage);
+                HttpResponseMessage authResponse = await SessionHelper.Current(HttpContext.Session, sessionStorage);
+                HttpContent content = authResponse.Content;
+                int _memberId = int.Parse(await content.ReadAsStringAsync());
+                if (_memberId == id)
+                {
+                    authResponse.StatusCode = HttpStatusCode.OK;
+                }
+                else
+                {
+                    authResponse = await SessionHelper.Authorize(HttpContext.Session, sessionStorage);
+                }
                 if (authResponse.StatusCode == HttpStatusCode.OK)
                 {
                     HttpClient httpClient = SessionHelper.GetHttpClient(HttpContext.Session, sessionStorage);
                     HttpResponseMessage response = await httpClient.GetAsync($"{Endpoints.Members}/{id}");
-                    HttpContent content = response.Content;
+                    content = response.Content;
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
                         JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
@@ -97,6 +107,14 @@ namespace eStoreClient.Pages.Members
                         PropertyNameCaseInsensitive = true,
                     };
                     Member = JsonSerializer.Deserialize<Member>(await content.ReadAsStringAsync(), jsonSerializerOptions);
+
+                    HttpResponseMessage authResponse = await SessionHelper.Current(HttpContext.Session, sessionStorage);
+                    content = authResponse.Content;
+                    int _memberId = int.Parse(await content.ReadAsStringAsync());
+                    if (_memberId == Member.MemberId)
+                    {
+                        return RedirectToPage(PageRoute.Profile, new { id = _memberId});
+                    }
                     return RedirectToPage(PageRoute.Members);
                 }
             }

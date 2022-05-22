@@ -27,10 +27,19 @@ namespace eStoreClient.Pages.Members
         {
             try
             {
+                HttpResponseMessage authResponse = await SessionHelper.Current(HttpContext.Session, sessionStorage);
+                HttpContent content = authResponse.Content;
+                int _memberId = int.Parse(await content.ReadAsStringAsync());
+
                 HttpResponseMessage response = await SessionHelper.Authenticate(HttpContext.Session, sessionStorage);
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    return RedirectToPage(PageRoute.Members);
+                    response = await SessionHelper.Authorize(HttpContext.Session, sessionStorage);
+                    if (response.StatusCode == HttpStatusCode.OK)
+                    {
+                        return RedirectToPage(PageRoute.Members);
+                    }
+                    return RedirectToPage(PageRoute.Profile, new { id = _memberId });
                 }
                 if (response.StatusCode == HttpStatusCode.BadRequest)
                 {
@@ -62,7 +71,9 @@ namespace eStoreClient.Pages.Members
                     {
                         return RedirectToPage(PageRoute.Members);
                     }
-                    return RedirectToPage(PageRoute.Orders);
+                    authResponse = await SessionHelper.Current(HttpContext.Session, sessionStorage);
+                    HttpContent content = authResponse.Content;
+                    return RedirectToPage(PageRoute.Profile, new { id = int.Parse(await content.ReadAsStringAsync()) });
                 }
                 if (response.StatusCode == HttpStatusCode.BadRequest)
                 {
