@@ -2,11 +2,24 @@
 using Microsoft.AspNetCore.Http;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace eStoreClient.Utilities
 {
     public static class SessionHelper
     {
+        public static async Task<HttpResponseMessage> Authenticate(ISession session, HttpSessionStorage sessionStorage)
+        {
+            HttpClient httpClient = SessionHelper.GetHttpClient(session, sessionStorage);
+            return await httpClient.GetAsync(Endpoints.Authenticate);
+        }
+
+        public static async Task<HttpResponseMessage> Authorize(ISession session, HttpSessionStorage sessionStorage)
+        {
+            HttpClient httpClient = SessionHelper.GetHttpClient(session, sessionStorage);
+            return await httpClient.GetAsync(Endpoints.Authorize);
+        }
+
         public static void GetNewHttpClient(ISession session, HttpSessionStorage sessionStorage)
         {
             HttpClient httpClient = new HttpClient();

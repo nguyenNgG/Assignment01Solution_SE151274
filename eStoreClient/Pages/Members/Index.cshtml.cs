@@ -26,42 +26,35 @@ namespace eStoreClient.Pages.Members
 
         public IList<Member> Members { get; set; }
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
             try
             {
-                HttpClient httpClient;
-                int? httpSessionIndex = SessionHelper.GetFromSession<int?>(HttpContext.Session, SessionValue.HttpSessionIndex);
-                if (httpSessionIndex == null)
+                HttpResponseMessage authResponse = await SessionHelper.Authorize(HttpContext.Session, sessionStorage);
+                if (authResponse.StatusCode == HttpStatusCode.OK)
                 {
-                    httpClient = new HttpClient();
-                    sessionStorage.HttpClients.Add(httpClient);
-                    SessionHelper.SaveToSession<int?>(HttpContext.Session, sessionStorage.HttpClients.IndexOf(httpClient), SessionValue.HttpSessionIndex);
-                }
-                else
-                {
-                    httpClient = sessionStorage.HttpClients[(int)httpSessionIndex];
-                }
-
-                HttpResponseMessage response = await httpClient.GetAsync("http://localhost:5000/api/Members");
-                HttpContent content = response.Content;
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
+                    HttpClient httpClient = SessionHelper.GetHttpClient(HttpContext.Session, sessionStorage);
+                    HttpResponseMessage response = await httpClient.GetAsync($"{Endpoints.Members}");
+                    HttpContent content = response.Content;
+                    if (response.StatusCode == HttpStatusCode.OK)
                     {
-                        PropertyNameCaseInsensitive = true,
-                    };
-                    Members = JsonSerializer.Deserialize<List<Member>>(await content.ReadAsStringAsync(), jsonSerializerOptions);
-                }
-                else
-                {
-
+                        JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true,
+                        };
+                        Members = JsonSerializer.Deserialize<List<Member>>(await content.ReadAsStringAsync(), jsonSerializerOptions);
+                        return Page();
+                    }
+                    if (response.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        return Page();
+                    }
                 }
             }
             catch
             {
-                Members = new List<Member>();
             }
+            return RedirectToPage(PageRoute.Login);
         }
     }
 }

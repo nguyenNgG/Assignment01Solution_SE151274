@@ -26,7 +26,20 @@ namespace eStoreAPI.Controllers
             configuration = _configuration;
         }
 
-        [HttpGet("auth")]
+        [HttpGet("authorize")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MemberAuthentication))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public ActionResult Authorize()
+        {
+            MemberAuthentication auth = SessionHelper.GetFromSession<MemberAuthentication>(HttpContext.Session, SessionValue.Authentication);
+            if (auth != null && auth.IsAdmin)
+            {
+                return Ok(auth);
+            }
+            return BadRequest();
+        }
+
+        [HttpGet("authenticate")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MemberAuthentication))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult Authenticate()
@@ -132,20 +145,22 @@ namespace eStoreAPI.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Member))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<Member>> AddMember(Member member)
         {
             try
             {
                 await repository.AddMember(member);
+                return CreatedAtAction("GetMember", new { id = member.MemberId }, member);
             }
-            catch (DbUpdateException)
+            catch
             {
                 if (await repository.GetMember(member.MemberId) != null)
                 {
-                    return BadRequest();
+                    return Conflict();
                 }
+                return BadRequest();
             }
-            return CreatedAtAction("GetMember", new { id = member.MemberId }, member);
         }
 
         // UPDATE
@@ -163,37 +178,39 @@ namespace eStoreAPI.Controllers
             try
             {
                 await repository.UpdateMember(member);
+                return Ok(member);
             }
-
             catch (DbUpdateException)
             {
                 if (await repository.GetMember(member.MemberId) == null)
                 {
                     return NotFound();
                 }
+                return BadRequest();
             }
-            return Ok(member);
         }
 
         // DELETE
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Member))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Member>> DeleteMember(int id)
         {
             try
             {
                 await repository.DeleteMember(id);
+                return NoContent();
             }
-
             catch (DbUpdateException)
             {
                 if (await repository.GetMember(id) == null)
                 {
                     return NotFound();
                 }
+                return BadRequest();
             }
-            return NoContent();
         }
 
     }

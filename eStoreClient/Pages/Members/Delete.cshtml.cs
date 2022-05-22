@@ -10,25 +10,36 @@ using System.Text.Json;
 using System.Net.Http;
 using eStoreClient.Constants;
 using System.Net;
+using eStoreClient.Utilities;
 
 namespace eStoreClient.Pages.Members
 {
     public class DeleteModel : PageModel
     {
+        HttpSessionStorage sessionStorage;
+
+        public DeleteModel(HttpSessionStorage _sessionStorage)
+        {
+            sessionStorage = _sessionStorage;
+        }
+
         [BindProperty]
         public Member Member { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            using (HttpClient httpClient = new HttpClient())
+            try
             {
-                try
+                if (id == null)
                 {
-                    if (id == null)
-                    {
-                        return NotFound();
-                    }
-                    HttpResponseMessage response = await httpClient.GetAsync($"http://localhost:5000/api/Members/{id}");
+                    return RedirectToPage(PageRoute.Members);
+                }
+
+                HttpResponseMessage authResponse = await SessionHelper.Authorize(HttpContext.Session, sessionStorage);
+                if (authResponse.StatusCode == HttpStatusCode.OK)
+                {
+                    HttpClient httpClient = SessionHelper.GetHttpClient(HttpContext.Session, sessionStorage);
+                    HttpResponseMessage response = await httpClient.GetAsync($"{Endpoints.Members}/{id}");
                     HttpContent content = response.Content;
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
@@ -37,48 +48,41 @@ namespace eStoreClient.Pages.Members
                             PropertyNameCaseInsensitive = true,
                         };
                         Member = JsonSerializer.Deserialize<Member>(await content.ReadAsStringAsync(), jsonSerializerOptions);
+                        return Page();
                     }
-                    else
+                    if (response.StatusCode == HttpStatusCode.NotFound)
                     {
-
+                        return RedirectToPage(PageRoute.Members);
                     }
-                    return Page();
-                }
-                catch
-                {
-                    Member = null;
-                    return Page();
                 }
             }
+            catch
+            {
+            }
+            return RedirectToPage(PageRoute.Login);
         }
 
         public async Task<IActionResult> OnPostAsync(int? id)
         {
-            using (HttpClient httpClient = new HttpClient())
+            try
             {
-                try
+                if (id == null)
                 {
-                    if (id == null)
-                    {
-                        return NotFound();
-                    }
-                    HttpResponseMessage response = await httpClient.DeleteAsync($"http://localhost:5000/api/Members/{id}");
-                    if (response.StatusCode == HttpStatusCode.NoContent)
-                    {
-                        return RedirectToPage(PageRoute.Members);
-                    }
-                    else
-                    {
-
-                    }
-                    return Page();
+                    return RedirectToPage(PageRoute.Members);
                 }
-                catch
+
+                HttpClient httpClient = SessionHelper.GetHttpClient(HttpContext.Session, sessionStorage);
+                HttpResponseMessage response = await httpClient.DeleteAsync($"{Endpoints.Members}/{id}");
+
+                if (response.StatusCode == HttpStatusCode.NoContent)
                 {
-                    Member = null;
-                    return Page();
+                    return RedirectToPage(PageRoute.Members);
                 }
             }
+            catch
+            {
+            }
+            return Page();
         }
     }
 }

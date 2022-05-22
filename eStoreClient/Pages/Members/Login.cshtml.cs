@@ -27,9 +27,7 @@ namespace eStoreClient.Pages.Members
         {
             try
             {
-                HttpClient httpClient = SessionHelper.GetHttpClient(HttpContext.Session, sessionStorage);
-                HttpResponseMessage response = await httpClient.GetAsync($"http://localhost:5000/api/Members/auth");
-                HttpContent content = response.Content;
+                HttpResponseMessage response = await SessionHelper.Authenticate(HttpContext.Session, sessionStorage);
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     return RedirectToPage(PageRoute.Members);
@@ -37,14 +35,12 @@ namespace eStoreClient.Pages.Members
                 if (response.StatusCode == HttpStatusCode.BadRequest)
                 {
                     LoginForm = new LoginForm();
-                    return Page();
                 }
             }
             catch
             {
-                return RedirectToPage(PageRoute.Members);
             }
-            return RedirectToPage(PageRoute.Members);
+            return Page();
         }
 
         public async Task<ActionResult> OnPostAsync()
@@ -58,8 +54,7 @@ namespace eStoreClient.Pages.Members
             {
                 HttpClient httpClient = SessionHelper.GetHttpClient(HttpContext.Session, sessionStorage);
                 StringContent body = new StringContent(JsonSerializer.Serialize(LoginForm), Encoding.UTF8, "application/json");
-                HttpResponseMessage response = await httpClient.PostAsync($"http://localhost:5000/api/Members/login", body);
-                HttpContent content = response.Content;
+                HttpResponseMessage response = await httpClient.PostAsync(Endpoints.Login, body);
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     return RedirectToPage(PageRoute.Members);
@@ -72,9 +67,8 @@ namespace eStoreClient.Pages.Members
             }
             catch
             {
-                return RedirectToPage(PageRoute.Members);
             }
-            return RedirectToPage(PageRoute.Members);
+            return Page();
         }
     }
 }

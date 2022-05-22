@@ -19,8 +19,7 @@ namespace eStoreClient.Pages.Members
 
         public async Task<ActionResult> OnGet()
         {
-            HttpClient httpClient = SessionHelper.GetHttpClient(HttpContext.Session, sessionStorage);
-            HttpResponseMessage response = await httpClient.GetAsync($"http://localhost:5000/api/Members/auth");
+            HttpResponseMessage response = await SessionHelper.Authenticate(HttpContext.Session, sessionStorage);
             if (response.StatusCode == HttpStatusCode.OK)
             {
                 return Page();

@@ -13,25 +13,42 @@ using System.Text;
 using eStoreClient.Constants;
 using Microsoft.AspNetCore.Http;
 using System.Net;
+using eStoreClient.Utilities;
 
 namespace eStoreClient.Pages.Members
 {
     public class EditModel : PageModel
     {
+        HttpSessionStorage sessionStorage;
+
+        public EditModel(HttpSessionStorage _sessionStorage)
+        {
+            sessionStorage = _sessionStorage;
+        }
+
         [BindProperty]
         public Member Member { get; set; }
 
+        [TempData]
+        public int MemberId { get; set; }
+
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            using (HttpClient httpClient = new HttpClient())
+            try
             {
-                try
+                if (id == null)
                 {
-                    if (id == null)
-                    {
-                        return NotFound();
-                    }
-                    HttpResponseMessage response = await httpClient.GetAsync($"http://localhost:5000/api/Members/{id}");
+                    return RedirectToPage(PageRoute.Members);
+                }
+
+                MemberId = (int)id;
+                TempData["MemberId"] = MemberId;
+
+                HttpResponseMessage authResponse = await SessionHelper.Authorize(HttpContext.Session, sessionStorage);
+                if (authResponse.StatusCode == HttpStatusCode.OK)
+                {
+                    HttpClient httpClient = SessionHelper.GetHttpClient(HttpContext.Session, sessionStorage);
+                    HttpResponseMessage response = await httpClient.GetAsync($"{Endpoints.Members}/{id}");
                     HttpContent content = response.Content;
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
@@ -40,53 +57,52 @@ namespace eStoreClient.Pages.Members
                             PropertyNameCaseInsensitive = true,
                         };
                         Member = JsonSerializer.Deserialize<Member>(await content.ReadAsStringAsync(), jsonSerializerOptions);
+                        return Page();
                     }
-                    else
+                    if (response.StatusCode == HttpStatusCode.NotFound)
                     {
-
+                        return RedirectToPage(PageRoute.Members);
                     }
-                    return Page();
-                }
-                catch
-                {
-                    Member = null;
-                    return Page();
                 }
             }
+            catch
+            {
+            }
+            return RedirectToPage(PageRoute.Login);
         }
 
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
+            Member.MemberId = (int)TempData.Peek("MemberId");
             if (!ModelState.IsValid)
             {
+                Member = StringTrimmer.TrimMember(Member);
                 return Page();
             }
 
-            using (HttpClient httpClient = new HttpClient())
+            try
             {
-                try
+                Member = StringTrimmer.TrimMember(Member);
+                HttpClient httpClient = SessionHelper.GetHttpClient(HttpContext.Session, sessionStorage);
+                StringContent body = new StringContent(JsonSerializer.Serialize(Member), Encoding.UTF8, "application/json");
+                HttpResponseMessage response = await httpClient.PutAsync($"{Endpoints.Members}/{MemberId}", body);
+                HttpContent content = response.Content;
+                if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    StringContent body = new StringContent(JsonSerializer.Serialize(Member), Encoding.UTF8, "application/json");
-                    HttpResponseMessage response = await httpClient.PutAsync($"http://localhost:5000/api/Members/{Member.MemberId}", body);
-                    HttpContent content = response.Content;
-                    if (response.StatusCode == HttpStatusCode.OK)
+                    JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
                     {
-                        JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
-                        {
-                            PropertyNameCaseInsensitive = true,
-                        };
-                        Member = JsonSerializer.Deserialize<Member>(await content.ReadAsStringAsync(), jsonSerializerOptions);
-                        return RedirectToPage(PageRoute.Members);
-                    }
-                    return Page();
-                }
-                catch
-                {
-                    return Page();
+                        PropertyNameCaseInsensitive = true,
+                    };
+                    Member = JsonSerializer.Deserialize<Member>(await content.ReadAsStringAsync(), jsonSerializerOptions);
+                    return RedirectToPage(PageRoute.Members);
                 }
             }
+            catch
+            {
+            }
+            return Page();
         }
 
     }

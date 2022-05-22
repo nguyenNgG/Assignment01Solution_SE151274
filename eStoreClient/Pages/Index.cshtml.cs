@@ -20,7 +20,7 @@ namespace eStoreClient.Pages
 
         public IActionResult OnGet()
         {
-            return RedirectToPage(PageRoute.Members);
+            return RedirectToPage(PageRoute.Login);
         }
     }
 }

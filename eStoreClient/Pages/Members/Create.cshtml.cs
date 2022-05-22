@@ -11,14 +11,37 @@ using System.Net.Http;
 using System.Text;
 using System.Net;
 using eStoreClient.Constants;
+using eStoreClient.Utilities;
 
 namespace eStoreClient.Pages.Members
 {
     public class CreateModel : PageModel
     {
-        public IActionResult OnGet()
+        HttpSessionStorage sessionStorage;
+
+        public CreateModel(HttpSessionStorage _sessionStorage)
         {
-            return Page();
+            sessionStorage = _sessionStorage;
+        }
+
+        public async Task<ActionResult> OnGet()
+        {
+            try
+            {
+                HttpResponseMessage response = await SessionHelper.Authorize(HttpContext.Session, sessionStorage);
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    return Page();
+                }
+                if (response.StatusCode == HttpStatusCode.BadRequest)
+                {
+                    return RedirectToPage(PageRoute.Login);
+                }
+            }
+            catch
+            {
+            }
+            return RedirectToPage(PageRoute.Login);
         }
 
         [BindProperty]
@@ -29,32 +52,31 @@ namespace eStoreClient.Pages.Members
         {
             if (!ModelState.IsValid)
             {
+                Member = StringTrimmer.TrimMember(Member);
                 return Page();
             }
 
-            using (HttpClient httpClient = new HttpClient())
+            try
             {
-                try
+                Member = StringTrimmer.TrimMember(Member);
+                HttpClient httpClient = SessionHelper.GetHttpClient(HttpContext.Session, sessionStorage);
+                StringContent body = new StringContent(JsonSerializer.Serialize(Member), Encoding.UTF8, "application/json");
+                HttpResponseMessage response = await httpClient.PostAsync(Endpoints.Members, body);
+                HttpContent content = response.Content;
+                if (response.StatusCode == HttpStatusCode.Created)
                 {
-                    StringContent body = new StringContent(JsonSerializer.Serialize(Member), Encoding.UTF8, "application/json");
-                    HttpResponseMessage response = await httpClient.PostAsync("http://localhost:5000/api/Members", body);
-                    HttpContent content = response.Content;
-                    if (response.StatusCode == HttpStatusCode.Created)
+                    JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
                     {
-                        JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
-                        {
-                            PropertyNameCaseInsensitive = true,
-                        };
-                        Member = JsonSerializer.Deserialize<Member>(await content.ReadAsStringAsync(), jsonSerializerOptions);
-                        return RedirectToPage(PageRoute.Members);
-                    }
-                    return Page();
-                }
-                catch
-                {
-                    return Page();
+                        PropertyNameCaseInsensitive = true,
+                    };
+                    Member = JsonSerializer.Deserialize<Member>(await content.ReadAsStringAsync(), jsonSerializerOptions);
+                    return RedirectToPage(PageRoute.Members);
                 }
             }
+            catch
+            {
+            }
+            return Page();
         }
     }
 }

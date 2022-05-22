@@ -9,24 +9,36 @@ using BusinessObjects;
 using System.Net.Http;
 using System.Text.Json;
 using System.Net;
+using eStoreClient.Utilities;
+using eStoreClient.Constants;
 
 namespace eStoreClient.Pages.Members
 {
     public class DetailsModel : PageModel
     {
+        HttpSessionStorage sessionStorage;
+
+        public DetailsModel(HttpSessionStorage _sessionStorage)
+        {
+            sessionStorage = _sessionStorage;
+        }
+
         public Member Member { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            using (HttpClient httpClient = new HttpClient())
+            try
             {
-                try
+                if (id == null)
                 {
-                    if (id == null)
-                    {
-                        return NotFound();
-                    }
-                    HttpResponseMessage response = await httpClient.GetAsync($"http://localhost:5000/api/Members/{id}");
+                    return RedirectToPage(PageRoute.Members);
+                }
+
+                HttpResponseMessage authResponse = await SessionHelper.Authorize(HttpContext.Session, sessionStorage);
+                if (authResponse.StatusCode == HttpStatusCode.OK)
+                {
+                    HttpClient httpClient = SessionHelper.GetHttpClient(HttpContext.Session, sessionStorage);
+                    HttpResponseMessage response = await httpClient.GetAsync($"{Endpoints.Members}/{id}");
                     HttpContent content = response.Content;
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
@@ -35,19 +47,18 @@ namespace eStoreClient.Pages.Members
                             PropertyNameCaseInsensitive = true,
                         };
                         Member = JsonSerializer.Deserialize<Member>(await content.ReadAsStringAsync(), jsonSerializerOptions);
+                        return Page();
                     }
-                    else
+                    if (response.StatusCode == HttpStatusCode.NotFound)
                     {
-
+                        return RedirectToPage(PageRoute.Members);
                     }
-                    return Page();
-                }
-                catch
-                {
-                    Member = null;
-                    return Page();
                 }
             }
+            catch
+            {
+            }
+            return RedirectToPage(PageRoute.Login);
         }
     }
 }
