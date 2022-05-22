@@ -40,11 +40,12 @@ namespace DataAccess.DAOs
         public async Task<List<Product>> GetProducts(string query)
         {
             FStoreDBContext db = new FStoreDBContext();
-            query = query.ToLowerInvariant();
+            query = query.ToLower();
             List<Product> products = await db.Products.Where(m =>
-            m.ProductName.ToLowerInvariant().Contains(query)
+            m.ProductId.ToString().Contains(query)
+            || m.ProductName.ToLower().Contains(query)
             || m.UnitPrice.ToString().Contains(query)
-            || m.Weight.ToLowerInvariant().Contains(query)
+            || m.Weight.ToLower().Contains(query)
             || m.UnitsInStock.ToString().Contains(query)
             ).ToListAsync();
             return products;

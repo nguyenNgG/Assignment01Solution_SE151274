@@ -9,6 +9,7 @@ namespace DataAccess.Repositories.Interfaces
 {
     public interface IMemberRepository
     {
+        public Task<Member> Login(string email, string password);
         public Task<List<Member>> GetMembers();
         public Task<List<Member>> GetMembers(string query);
         public Task<Member> GetMember(int id);

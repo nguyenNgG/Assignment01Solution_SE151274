@@ -16,6 +16,7 @@ namespace DataAccess.Repositories
         public Task<Member> GetMember(int id) => MemberDAO.Instance.GetMember(id);
         public Task<List<Member>> GetMembers() => MemberDAO.Instance.GetMembers();
         public Task<List<Member>> GetMembers(string query) => MemberDAO.Instance.GetMembers(query);
+        public Task<Member> Login(string email, string password) => MemberDAO.Instance.Login(email, password);
         public Task UpdateMember(Member member) => MemberDAO.Instance.UpdateMember(member);
     }
 }

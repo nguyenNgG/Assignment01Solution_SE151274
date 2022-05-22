@@ -29,6 +29,14 @@ namespace DataAccess.DAOs
             }
         }
 
+        public async Task<Member> Login(string email, string password)
+        {
+            FStoreDBContext db = new FStoreDBContext();
+            Member member = null;
+            member = await db.Members.FirstOrDefaultAsync(m => m.Email == email && m.Password == password);
+            return member;
+        }
+
         public async Task<Member> GetMember(int id)
         {
             FStoreDBContext db = new FStoreDBContext();
@@ -40,13 +48,13 @@ namespace DataAccess.DAOs
         public async Task<List<Member>> GetMembers(string query)
         {
             FStoreDBContext db = new FStoreDBContext();
-            query = query.ToLowerInvariant();
+            query = query.ToLower();
             List<Member> members = await db.Members.Where(m =>
             m.MemberId.ToString().Contains(query)
-            || m.Email.ToLowerInvariant().Contains(query)
-            || m.CompanyName.ToLowerInvariant().Contains(query)
-            || m.City.ToLowerInvariant().Contains(query)
-            || m.Country.ToLowerInvariant().Contains(query)
+            || m.Email.ToLower().Contains(query)
+            || m.CompanyName.ToLower().Contains(query)
+            || m.City.ToLower().Contains(query)
+            || m.Country.ToLower().Contains(query)
             ).ToListAsync();
             return members;
         }

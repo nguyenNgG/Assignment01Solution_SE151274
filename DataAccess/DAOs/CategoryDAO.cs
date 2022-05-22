@@ -40,9 +40,9 @@ namespace DataAccess.DAOs
         public async Task<List<Category>> GetCategories(string query)
         {
             FStoreDBContext db = new FStoreDBContext();
-            query = query.ToLowerInvariant();
+            query = query.ToLower();
             List<Category> categorys = await db.Categories.Where(m =>
-            m.CategoryName.ToLowerInvariant().Contains(query)
+            m.CategoryName.ToLower().Contains(query)
             || m.CategoryId.ToString().Contains(query)
             ).ToListAsync();
             return categorys;
