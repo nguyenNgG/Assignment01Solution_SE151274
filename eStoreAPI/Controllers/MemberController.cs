@@ -90,7 +90,7 @@ namespace eStoreAPI.Controllers
                 member = new Member
                 {
                     Email = adminEmail,
-                    MemberId = -1,
+                    MemberId = -993901,
                 };
             }
             else

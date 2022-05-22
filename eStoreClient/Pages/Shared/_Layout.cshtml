@@ -5,7 +5,7 @@
 @{
     bool isAuthenticated = false;
     bool isAuthorized = false;
-    int memberId = -2;
+    int memberId = -993901;
     HttpResponseMessage response = await SessionHelper.Authenticate(Context.Session, sessionStorage);
     if (response.StatusCode == HttpStatusCode.OK)
     {
@@ -42,18 +42,6 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        @if (isAuthorized)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/Members/Index">Members</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/Products/Index">Products</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/Orders/Index">Orders</a>
-                            </li>
-                        }
                         @if (!isAuthenticated)
                         {
                             <li class="nav-item">
@@ -63,11 +51,23 @@
                         @if (isAuthenticated && !isAuthorized)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/Members/@memberId">Profile</a>
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Members/Details" asp-route-id="@memberId">Profile</a>  
+                            </li>
+                        }
+                        @if (isAuthorized)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Members/Index">Members</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Products/Index">Products</a>
                             </li>
                         }
                         @if (isAuthenticated)
                         {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Orders/Index">Orders</a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-page="/Members/Logout">Logout</a>
                             </li>

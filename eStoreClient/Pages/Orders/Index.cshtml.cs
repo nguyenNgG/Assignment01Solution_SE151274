@@ -6,16 +6,60 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using BusinessObjects;
+using System.Net.Http;
+using eStoreClient.Utilities;
+using eStoreClient.Constants;
+using System.Net;
+using System.Text.Json;
 
 namespace eStoreClient.Pages.Orders
 {
     public class IndexModel : PageModel
     {
-        public IList<Order> Order { get;set; }
+        HttpSessionStorage sessionStorage;
 
-        public async Task OnGetAsync()
+        public IndexModel(HttpSessionStorage _sessionStorage)
         {
-            
+            sessionStorage = _sessionStorage;
+        }
+
+        public List<Order> Orders { get; set; }
+
+        public async Task<ActionResult> OnGetAsync()
+        {
+            try
+            {
+                HttpResponseMessage authResponse = await SessionHelper.Authorize(HttpContext.Session, sessionStorage);
+                HttpContent content = authResponse.Content;
+                int _memberId = -993901;
+                bool isAdmin = true;
+                string query = "";
+                if (authResponse.StatusCode != HttpStatusCode.OK)
+                {
+                    isAdmin = false;
+                    authResponse = await SessionHelper.Current(HttpContext.Session, sessionStorage);
+                    content = authResponse.Content;
+                    _memberId = int.Parse(await content.ReadAsStringAsync());
+                    query = $"?memberId={_memberId}";
+                }
+
+                HttpClient httpClient = SessionHelper.GetHttpClient(HttpContext.Session, sessionStorage);
+                HttpResponseMessage response = await httpClient.GetAsync($"{Endpoints.Orders}{query}");
+                content = response.Content;
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                    };
+                    Orders = JsonSerializer.Deserialize<List<Order>>(await content.ReadAsStringAsync(), jsonSerializerOptions);
+                    return Page();
+                }
+            }
+            catch
+            {
+            }
+            return RedirectToPage(PageRoute.Login);
         }
     }
 }

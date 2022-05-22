@@ -22,10 +22,8 @@ namespace BusinessObjects
         [Required]
         public DateTime OrderDate { get; set; }
 
-        [Required]
         public DateTime? RequiredDate { get; set; }
 
-        [Required]
         public DateTime? ShippedDate { get; set; }
 
         [Required]
