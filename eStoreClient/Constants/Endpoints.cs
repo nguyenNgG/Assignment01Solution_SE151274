@@ -9,5 +9,9 @@
         public static string Authorize = $"{BaseUri}/Members/authorize";
 
         public static string Members = $"{BaseUri}/Members";
+        public static string Products = $"{BaseUri}/Products";
+        public static string Orders = $"{BaseUri}/Orders";
+        public static string OrderDetails = $"{BaseUri}/OrderDetails";
+        public static string Categories = $"{BaseUri}/Categories";
     }
 }

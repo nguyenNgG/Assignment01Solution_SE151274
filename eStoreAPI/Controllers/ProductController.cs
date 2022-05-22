@@ -61,20 +61,22 @@ namespace eStoreAPI.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Product))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<Product>> AddProduct(Product product)
         {
             try
             {
                 await repository.AddProduct(product);
+                return CreatedAtAction("GetProduct", new { id = product.ProductId }, product);
             }
             catch (DbUpdateException)
             {
                 if (await repository.GetProduct(product.ProductId) != null)
                 {
-                    return BadRequest();
+                    return Conflict();
                 }
+                return BadRequest();
             }
-            return CreatedAtAction("GetProduct", new { id = product.ProductId }, product);
         }
 
         // UPDATE
@@ -92,6 +94,7 @@ namespace eStoreAPI.Controllers
             try
             {
                 await repository.UpdateProduct(product);
+                return Ok(product);
             }
 
             catch (DbUpdateException)
@@ -100,19 +103,21 @@ namespace eStoreAPI.Controllers
                 {
                     return NotFound();
                 }
+                return BadRequest();
             }
-            return Ok(product);
         }
 
         // DELETE
         [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Product))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<Product>> DeleteProduct(int id)
         {
             try
             {
                 await repository.DeleteProduct(id);
+                return NoContent();
             }
 
             catch (DbUpdateException)
@@ -121,8 +126,8 @@ namespace eStoreAPI.Controllers
                 {
                     return NotFound();
                 }
+                return BadRequest();
             }
-            return NoContent();
         }
 
     }

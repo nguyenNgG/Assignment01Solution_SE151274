@@ -76,6 +76,7 @@ namespace eStoreClient.Pages.Members
             catch
             {
             }
+            Member = StringTrimmer.TrimMember(Member);
             return Page();
         }
     }

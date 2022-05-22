@@ -33,14 +33,14 @@ namespace DataAccess.DAOs
         {
             FStoreDBContext db = new FStoreDBContext();
             OrderDetail orderDetail = null;
-            orderDetail = await db.OrderDetails.FirstOrDefaultAsync(m => m.OrderId == orderId && m.ProductId == productId);
+            orderDetail = await db.OrderDetails.Include(m => m.Product).FirstOrDefaultAsync(m => m.OrderId == orderId && m.ProductId == productId);
             return orderDetail;
         }
 
         public async Task<List<OrderDetail>> GetOrderDetails(int orderId)
         {
             FStoreDBContext db = new FStoreDBContext();
-            List<OrderDetail> orderDetails = await db.OrderDetails.Where(m => m.OrderId == orderId).ToListAsync();
+            List<OrderDetail> orderDetails = await db.OrderDetails.Include(m => m.Product).Where(m => m.OrderId == orderId).ToListAsync();
             return orderDetails;
         }
 

@@ -57,7 +57,12 @@ namespace eStoreClient.Pages.Members
                 HttpResponseMessage response = await httpClient.PostAsync(Endpoints.Login, body);
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    return RedirectToPage(PageRoute.Members);
+                    HttpResponseMessage authResponse = await SessionHelper.Authorize(HttpContext.Session, sessionStorage);
+                    if (authResponse.StatusCode == HttpStatusCode.OK)
+                    {
+                        return RedirectToPage(PageRoute.Members);
+                    }
+                    return RedirectToPage(PageRoute.Orders);
                 }
                 if (response.StatusCode == HttpStatusCode.BadRequest)
                 {

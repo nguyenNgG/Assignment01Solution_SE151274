@@ -33,7 +33,7 @@ namespace DataAccess.DAOs
         {
             FStoreDBContext db = new FStoreDBContext();
             Product product = null;
-            product = await db.Products.FirstOrDefaultAsync(m => m.ProductId == id);
+            product = await db.Products.Include(m => m.Category).FirstOrDefaultAsync(m => m.ProductId == id);
             return product;
         }
 
@@ -41,7 +41,7 @@ namespace DataAccess.DAOs
         {
             FStoreDBContext db = new FStoreDBContext();
             query = query.ToLower();
-            List<Product> products = await db.Products.Where(m =>
+            List<Product> products = await db.Products.Include(m => m.Category).Where(m =>
             m.ProductId.ToString().Contains(query)
             || m.ProductName.ToLower().Contains(query)
             || m.UnitPrice.ToString().Contains(query)
@@ -54,7 +54,7 @@ namespace DataAccess.DAOs
         public async Task<List<Product>> GetProducts()
         {
             FStoreDBContext db = new FStoreDBContext();
-            return await db.Products.ToListAsync();
+            return await db.Products.Include(m => m.Category).ToListAsync();
         }
 
         public async Task AddProduct(Product product)

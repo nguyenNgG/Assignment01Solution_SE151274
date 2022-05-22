@@ -4,10 +4,16 @@
 @inject HttpSessionStorage sessionStorage;
 @{
     bool isAuthenticated = false;
+    bool isAuthorized = false;
     HttpResponseMessage response = await SessionHelper.Authenticate(Context.Session, sessionStorage);
     if (response.StatusCode == HttpStatusCode.OK)
     {
         isAuthenticated = true;
+    }
+    response = await SessionHelper.Authorize(Context.Session, sessionStorage);
+    if (response.StatusCode == HttpStatusCode.OK)
+    {
+        isAuthorized = true;
     }
 }
 
@@ -31,9 +37,18 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
-                        </li>
+                        @if (isAuthorized)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Members/Index">Members</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Products/Index">Products</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Orders/Index">Orders</a>
+                            </li>
+                        }
                         @if (!isAuthenticated)
                         {
                             <li class="nav-item">
