@@ -65,6 +65,32 @@ namespace eStoreAPI.Controllers
             return BadRequest();
         }
 
+        [HttpGet("cart")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Cart))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public ActionResult GetCart()
+        {
+            Cart cart = SessionHelper.GetFromSession<Cart>(HttpContext.Session, SessionValue.Cart);
+            if (cart == null)
+            {
+                return BadRequest();
+            }
+            return Ok(cart);
+        }
+
+        [HttpPost("cart")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Cart))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public ActionResult SetCart(Cart cart)
+        {
+            if (cart == null)
+            {
+                return BadRequest();
+            }
+            SessionHelper.SaveToSession<Cart>(HttpContext.Session, cart, SessionValue.Cart);
+            return Ok(cart);
+        }
+
         [HttpPost("login")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MemberAuthentication))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
