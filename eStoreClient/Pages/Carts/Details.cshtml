@@ -1,0 +1,49 @@
+﻿@page
+@using System.Collections.Generic;
+@model eStoreClient.Pages.Carts.DetailsModel
+@{
+    ViewData["Title"] = "Cart";
+    var cart = Model.Cart;
+}
+
+<h1>Order Items</h1>
+
+<a asp-page="/Carts/Create" class="btn btn-primary mb-2">Add Product to Order</a>
+<a asp-page="/Orders/Prepare" class="btn btn-outline-primary mb-2">Create Order</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Cart.CartDetails.First().ProductItem.ProductName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Cart.CartDetails.First().ProductItem.UnitPrice)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Cart.CartDetails.First().Quantity)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var cartDetail in cart.CartDetails)
+        {
+            <tr>
+                <td>
+                    @cartDetail.ProductItem.ProductName
+                </td>
+                <td>
+                    @String.Format("{0:N}", cartDetail.ProductItem.UnitPrice) VND
+                </td>
+                <td>
+                    @cartDetail.Quantity
+                </td>
+                <td>
+                    <a asp-page="/Carts/Edit" asp-route-item-index="@cart.CartDetails.FindIndex(cd => cd == cartDetail)">Edit</a> | 
+                    <a asp-page="/Carts/Delete" asp-route-item-index="@cart.CartDetails.FindIndex(cd => cd == cartDetail)">Remove</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

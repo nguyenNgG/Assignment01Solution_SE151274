@@ -25,6 +25,8 @@ namespace eStoreClient.Pages.Orders
 
         public List<Order> Orders { get; set; }
 
+        public bool IsStaff { get; set; }
+
         public async Task<ActionResult> OnGetAsync()
         {
             try
@@ -32,15 +34,18 @@ namespace eStoreClient.Pages.Orders
                 HttpResponseMessage authResponse = await SessionHelper.Authorize(HttpContext.Session, sessionStorage);
                 HttpContent content = authResponse.Content;
                 int _memberId = -993901;
-                bool isAdmin = true;
+                IsStaff = false;
                 string query = "";
                 if (authResponse.StatusCode != HttpStatusCode.OK)
                 {
-                    isAdmin = false;
                     authResponse = await SessionHelper.Current(HttpContext.Session, sessionStorage);
                     content = authResponse.Content;
                     _memberId = int.Parse(await content.ReadAsStringAsync());
                     query = $"?memberId={_memberId}";
+                }
+                else
+                {
+                    IsStaff = true;
                 }
 
                 HttpClient httpClient = SessionHelper.GetHttpClient(HttpContext.Session, sessionStorage);

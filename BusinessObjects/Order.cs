@@ -14,16 +14,21 @@ namespace BusinessObjects
             OrderDetails = new HashSet<OrderDetail>();
         }
 
+        [Display(Name = "Order ID")]
         public int OrderId { get; set; }
 
         [Required]
+        [Display(Name = "Member ID")]
         public int? MemberId { get; set; }
 
         [Required]
+        [Display(Name = "Order Date")]
         public DateTime OrderDate { get; set; }
 
+        [Display(Name = "Required Date")]
         public DateTime? RequiredDate { get; set; }
 
+        [Display(Name = "Shipped Date")]
         public DateTime? ShippedDate { get; set; }
 
         [Required]

@@ -13,6 +13,11 @@
 
         // Order
         public static string Orders = "/Orders/Index";
+        public static string OrderPrepare = "/Orders/Prepare";
+
+        // Cart
+        public static string Cart = "/Carts/Details";
+        public static string CartCreate = "/Carts/Create";
 
     }
 }

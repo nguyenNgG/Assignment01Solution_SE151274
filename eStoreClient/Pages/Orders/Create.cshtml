@@ -2,7 +2,7 @@
 @model eStoreClient.Pages.Orders.CreateModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create Order";
 }
 
 <h1>Create</h1>
@@ -23,19 +23,9 @@
                 <select asp-for="Order.MemberId" class ="form-control" asp-items="ViewBag.MemberId"></select>
             </div>
             <div class="form-group">
-                <label asp-for="Order.OrderDate" class="control-label"></label>
-                <input asp-for="Order.OrderDate" class="form-control" />
-                <span asp-validation-for="Order.OrderDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
                 <label asp-for="Order.RequiredDate" class="control-label"></label>
                 <input asp-for="Order.RequiredDate" class="form-control" />
                 <span asp-validation-for="Order.RequiredDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Order.ShippedDate" class="control-label"></label>
-                <input asp-for="Order.ShippedDate" class="form-control" />
-                <span asp-validation-for="Order.ShippedDate" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Order.Freight" class="control-label"></label>
@@ -50,7 +40,7 @@
 </div>
 
 <div>
-    <a asp-page="Index">Back to List</a>
+    <a asp-page="/Orders/Prepare">Back</a>
 </div>
 
 @section Scripts {

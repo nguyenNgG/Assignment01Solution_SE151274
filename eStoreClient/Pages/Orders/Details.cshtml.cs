@@ -6,35 +6,71 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using BusinessObjects;
+using eStoreClient.Utilities;
+using System.Net.Http;
+using System.Net;
+using eStoreClient.Constants;
+using System.Text.Json;
 
 namespace eStoreClient.Pages.Orders
 {
     public class DetailsModel : PageModel
     {
-        private readonly BusinessObjects.FStoreDBContext _context;
+        HttpSessionStorage sessionStorage;
 
-        public DetailsModel(BusinessObjects.FStoreDBContext context)
+        public DetailsModel(HttpSessionStorage _sessionStorage)
         {
-            _context = context;
+            sessionStorage = _sessionStorage;
         }
 
+        [FromQuery(Name = "order-id")]
+        public string OrderId { get; set; }
+        public bool IsStaff { get; set; } = false;
+
         public Order Order { get; set; }
+        public List<OrderDetail> OrderDetails { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public async Task<ActionResult> OnGetAsync()
         {
-            if (id == null)
+            try
             {
-                return NotFound();
+                if (string.IsNullOrWhiteSpace(OrderId))
+                {
+                    return RedirectToPage(PageRoute.Orders);
+                }
+
+                HttpResponseMessage authResponse = await SessionHelper.Authorize(HttpContext.Session, sessionStorage);
+                HttpContent content = authResponse.Content;
+                if (authResponse.StatusCode == HttpStatusCode.OK)
+                {
+                    IsStaff = true;
+                    HttpClient httpClient = SessionHelper.GetHttpClient(HttpContext.Session, sessionStorage);
+                    HttpResponseMessage response = await httpClient.GetAsync($"{Endpoints.Orders}/{OrderId}");
+                    content = response.Content;
+                    if (response.StatusCode == HttpStatusCode.OK)
+                    {
+                        JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true,
+                        };
+                        Order = JsonSerializer.Deserialize<Order>(await content.ReadAsStringAsync(), jsonSerializerOptions);
+
+                        httpClient = SessionHelper.GetHttpClient(HttpContext.Session, sessionStorage);
+                        response = await httpClient.GetAsync($"{Endpoints.OrderDetails}?orderId={OrderId}");
+                        content = response.Content;
+                        if (response.StatusCode == HttpStatusCode.OK)
+                        {
+                            OrderDetails = JsonSerializer.Deserialize<List<OrderDetail>>(await content.ReadAsStringAsync(), jsonSerializerOptions);
+                            return Page();
+                        }
+                        return RedirectToPage(PageRoute.Orders);
+                    }
+                }
             }
-
-            Order = await _context.Orders
-                .Include(o => o.Member).FirstOrDefaultAsync(m => m.OrderId == id);
-
-            if (Order == null)
+            catch
             {
-                return NotFound();
             }
-            return Page();
+            return RedirectToPage(PageRoute.Login);
         }
     }
 }

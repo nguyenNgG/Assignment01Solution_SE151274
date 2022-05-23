@@ -1,0 +1,21 @@
+﻿@page
+@model eStoreClient.Pages.Carts.EditModel
+@{
+}
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div class="form-group">
+                <label asp-for="CartDetail.Quantity" class="control-label"></label>
+                <input asp-for="CartDetail.Quantity" type="number" class="form-control" />
+                <span asp-validation-for="CartDetail.Quantity" class="text-danger"></span>
+                <span class="text-danger">@Model.QuantityMessage</span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Update" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<a asp-page="/Carts/Details">Back</a>

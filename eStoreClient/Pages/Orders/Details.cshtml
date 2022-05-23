@@ -33,7 +33,7 @@
             @Html.DisplayNameFor(model => model.Order.Freight)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Order.Freight)
+            @String.Format("{0:N}", Model.Order.Freight)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Order.Member)
@@ -43,7 +43,45 @@
         </dd>
     </dl>
 </div>
-<div>
-    <a asp-page="./Edit" asp-route-id="@Model.Order.OrderId">Edit</a> |
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.OrderDetails.First().Product.ProductName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.OrderDetails.First().UnitPrice)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.OrderDetails.First().Quantity)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var orderDetail in Model.OrderDetails)
+        {
+            <tr>
+                <td>
+                    @orderDetail.Product.ProductName
+                </td>
+                <td>
+                    @String.Format("{0:N}", orderDetail.UnitPrice) VND
+                </td>
+                <td>
+                    @orderDetail.Quantity
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="d-flex flex-row">
+    @if (Model.IsStaff)
+    {
+        <a asp-page="./Edit" asp-route-order-id="@Model.OrderId">Edit</a>
+        <div class="mx-2">|</div>
+    }
     <a asp-page="./Index">Back to List</a>
 </div>

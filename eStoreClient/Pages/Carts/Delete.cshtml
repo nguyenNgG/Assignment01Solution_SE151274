@@ -1,0 +1,24 @@
+﻿@page
+@model eStoreClient.Pages.Carts.DeleteModel
+@{
+}
+
+<div class="card">
+    <div class="card-body">
+        <div class="card-text">
+            <p>Are you sure you want to remove this order item?</p>
+            <p>
+                <div class="font-weight-bold">@Model.CartDetail.ProductItem.ProductName</div>
+                <div>@Model.CartDetail.Quantity units</div>
+            </p>
+        </div>
+    </div>
+    <div class="card-footer">
+        <div class="d-flex flex-row">
+            <form method="post">
+                <input type="submit" value="Yes" class="btn btn-danger" />
+            </form>
+            <a asp-page="/Carts/Details" class="btn btn-outline-primary ml-2">No</a>
+        </div>
+    </div>
+</div>

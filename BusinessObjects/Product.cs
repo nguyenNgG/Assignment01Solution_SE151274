@@ -17,9 +17,11 @@ namespace BusinessObjects
         public int ProductId { get; set; }
 
         [Required]
+        [Display(Name = "Category ID")]
         public int? CategoryId { get; set; }
 
         [Required]
+        [Display(Name = "Product Name")]
         [StringLength(40, ErrorMessage = "{0} must not have over {1} characters. ")]
         public string ProductName { get; set; }
 

@@ -1,0 +1,85 @@
+﻿@page
+@model eStoreClient.Pages.Reports.ReportModel
+@{
+}
+<h1>Index</h1>
+
+<form method="POST">
+    <div class="form-group">
+        <label asp-for="StartDate" class="control-label"></label>
+        <input asp-for="StartDate" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="EndDate" class="control-label"></label>
+        <input asp-for="EndDate" class="form-control" />
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Generate Report" class="btn btn-primary" />
+    </div>
+</form>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalOrders[0].OrderId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalOrders[0].OrderDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalOrders[0].RequiredDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalOrders[0].ShippedDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalOrders[0].Freight)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalOrders[0].Member)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalOrders[0].TotalPrice)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.TotalOrders)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.OrderId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.OrderDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.RequiredDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ShippedDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Freight)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Member.Email)
+                </td>
+                <td>
+                    @String.Format("{0:N}", item.TotalPrice) VND
+                </td>
+            </tr>
+        }
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>
+                @String.Format("{0:N}", Model.TotalOfPeriod) VND
+            </td>
+        </tr>
+    </tbody>
+</table>

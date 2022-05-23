@@ -21,6 +21,7 @@ namespace BusinessObjects
         public string Email { get; set; }
 
         [Required]
+        [Display(Name = "Company Name")]
         [StringLength(40, ErrorMessage = "{0} must not have over {1} characters. ")]
         public string CompanyName { get; set; }
 

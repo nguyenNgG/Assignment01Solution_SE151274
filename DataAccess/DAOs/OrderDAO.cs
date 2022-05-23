@@ -33,20 +33,20 @@ namespace DataAccess.DAOs
         {
             FStoreDBContext db = new FStoreDBContext();
             Order order = null;
-            order = await db.Orders.Include(m => m.Member).FirstOrDefaultAsync(m => m.OrderId == id);
+            order = await db.Orders.Include(m => m.Member).Include(m => m.OrderDetails).FirstOrDefaultAsync(m => m.OrderId == id);
             return order;
         }
 
         public async Task<List<Order>> GetOrders(int memberId)
         {
             FStoreDBContext db = new FStoreDBContext();
-            return await db.Orders.Include(m => m.Member).Where(m => m.MemberId == memberId).ToListAsync();
+            return await db.Orders.Include(m => m.Member).Include(m => m.OrderDetails).Where(m => m.MemberId == memberId).ToListAsync();
         }
 
         public async Task<List<Order>> GetOrders()
         {
             FStoreDBContext db = new FStoreDBContext();
-            return await db.Orders.Include(m => m.Member).ToListAsync();
+            return await db.Orders.Include(m => m.Member).Include(m => m.OrderDetails).ToListAsync();
         }
 
         public async Task AddOrder(Order order)
